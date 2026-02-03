@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .calendar {
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-year {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .today-btn {
+            margin-bottom: 15px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border-radius: 50%;
+            cursor: default;
+        }
+
+        .day.other-month {
+            opacity: 0.3;
+        }
+
+        .day.today {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar">
+        <button class="today-btn" id="today-btn" onclick="goToToday()">Today</button>
+        <div class="header">
+            <span class="month-year" id="month-year"></span>
+            <div class="nav-buttons" id="nav-buttons">
+                <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+                <button class="nav-btn" onclick="changeMonth(1)">›</button>
+            </div>
+        </div>
+        <div class="weekdays" id="weekdays"></div>
+        <div class="days" id="days"></div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const params = new URLSearchParams(window.location.search);
+        
+        // Parse settings
+        const settings = {
+            weekStart: params.get('weekStart') || 'sunday',
+            showTodayBtn: params.get('showTodayBtn') === 'true',
+            highlightToday: params.get('highlightToday') !== 'false',
+            showBorder: params.get('showBorder') === 'true',
+            showNavigation: params.get('showNavigation') !== 'false',
+            themeColor: params.get('themeColor') || '#f4c3d9',
+            headerTextColor: params.get('headerTextColor') || '#37352F',
+            dayTextColor: params.get('dayTextColor') || '#37352F',
+            weekdayTextColor: params.get('weekdayTextColor') || '#718096',
+            bgColor: params.get('bgColor') || '#FFFFFF',
+            darkMode: params.get('darkMode') === 'true'
+        };
+
+        // Apply styles
+        document.body.style.background = settings.bgColor;
+        
+        const calendar = document.querySelector('.calendar');
+        if (settings.showBorder) {
+            calendar.style.border = `2px solid ${settings.themeColor}`;
+            calendar.style.borderRadius = '12px';
+            calendar.style.padding = '20px';
+        }
+
+        const monthYear = document.getElementById('month-year');
+        monthYear.style.color = settings.headerTextColor;
+
+        const navButtons = document.getElementById('nav-buttons');
+        navButtons.style.display = settings.showNavigation ? 'flex' : 'none';
+
+        const navBtns = document.querySelectorAll('.nav-btn');
+        navBtns.forEach(btn => {
+            btn.style.background = settings.themeColor + '22';
+            btn.style.color = settings.headerTextColor;
+            btn.addEventListener('mouseover', () => btn.style.background = settings.themeColor + '44');
+            btn.addEventListener('mouseout', () => btn.style.background = settings.themeColor + '22');
+        });
+
+        const todayBtn = document.getElementById('today-btn');
+        todayBtn.style.display = settings.showTodayBtn ? 'block' : 'none';
+        todayBtn.style.background = settings.themeColor;
+        todayBtn.style.color = settings.darkMode ? '#191919' : '#FFFFFF';
+
+        // Calendar data
+        let currentDate = new Date();
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const weekdaysSun = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        const weekdaysMon = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            
+            monthYear.textContent = months[month] + ' ' + year;
+            
+            // Render weekday headers
+            const weekdaysEl = document.getElementById('weekdays');
+            const weekdays = settings.weekStart === 'monday' ? weekdaysMon : weekdaysSun;
+            weekdaysEl.innerHTML = weekdays.map(d => 
+                `<div class="weekday" style="color: ${settings.weekdayTextColor}">${d}</div>`
+            ).join('');
+            
+            // Calculate days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            let startDayOfWeek = firstDay.getDay();
+            
+            if (settings.weekStart === 'monday') {
+                startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+            }
+            
+            const daysEl = document.getElementById('days');
+            let html = '';
+            
+            // Previous month days
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            for (let i = startDayOfWeek - 1; i >= 0; i--) {
+                html += `<div class="day other-month" style="color: ${settings.dayTextColor}">${prevMonthLastDay - i}</div>`;
+            }
+            
+            // Current month days
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                let style = `color: ${settings.dayTextColor}`;
+                
+                if (isToday && settings.highlightToday) {
+                    style = `background: ${settings.themeColor}; color: ${settings.darkMode ? '#191919' : '#FFFFFF'}`;
+                }
+                
+                html += `<div class="day${isToday ? ' today' : ''}" style="${style}">${day}</div>`;
+            }
+            
+            // Next month days
+            const totalCells = Math.ceil((startDayOfWeek + lastDay.getDate()) / 7) * 7;
+            const remaining = totalCells - (startDayOfWeek + lastDay.getDate());
+            for (let i = 1; i <= remaining; i++) {
+                html += `<div class="day other-month" style="color: ${settings.dayTextColor}">${i}</div>`;
+            }
+            
+            daysEl.innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        // Initial render
+        renderCalendar();
+    </script>
+</body>
+</html>

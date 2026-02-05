@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar Widget Builder | KDigitalStudio</title>
+    <title>Countdown Widget Builder | KDigitalStudio</title>
     <style>
         * {
             margin: 0;
@@ -69,6 +69,7 @@
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
         }
 
+        .kofi-text,
         .feedback-text {
             font-size: 14px;
             color: #4a5568;
@@ -76,6 +77,7 @@
             line-height: 1.4;
         }
 
+        .kofi-button,
         .feedback-button {
             display: inline-block;
             background: linear-gradient(135deg, #b794d5 0%, #f4c3d9 100%);
@@ -88,30 +90,8 @@
             transition: transform 0.2s ease;
         }
 
+        .kofi-button:hover,
         .feedback-button:hover {
-            transform: scale(1.05);
-        }
-
-        .kofi-text {
-            font-size: 14px;
-            color: #4a5568;
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
-
-        .kofi-button {
-            display: inline-block;
-            background: linear-gradient(135deg, #b794d5 0%, #f4c3d9 100%);
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            font-size: 13px;
-            transition: transform 0.2s ease;
-        }
-
-        .kofi-button:hover {
             transform: scale(1.05);
         }
 
@@ -166,6 +146,8 @@
         }
 
         input[type="text"],
+        input[type="date"],
+        input[type="time"],
         input[type="color"],
         select {
             width: 100%;
@@ -177,6 +159,8 @@
         }
 
         input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
         select:focus {
             outline: none;
             border-color: #667eea;
@@ -188,15 +172,17 @@
             padding: 5px;
         }
 
+        .datetime-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
         .toggle-group {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             margin-top: 8px;
-        }
-
-        .toggle-group.single {
-            grid-template-columns: 1fr;
         }
 
         .toggle-item {
@@ -259,28 +245,60 @@
             transform: translateX(20px);
         }
 
-        .start-day-options {
+        .font-options {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-top: 8px;
         }
 
-        .start-day-option {
+        .font-option {
+            padding: 20px 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 24px;
+        }
+
+        .font-option:hover {
+            border-color: #cbd5e0;
+        }
+
+        .font-option.selected {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .font-option small {
+            display: block;
+            font-size: 11px;
+            margin-top: 5px;
+            color: #718096;
+        }
+
+        .align-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .align-option {
             padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 14px;
         }
 
-        .start-day-option:hover {
+        .align-option:hover {
             border-color: #cbd5e0;
         }
 
-        .start-day-option.selected {
+        .align-option.selected {
             border-color: #667eea;
             background: #f7fafc;
         }
@@ -298,38 +316,8 @@
         .color-hex {
             font-family: 'Courier New', monospace;
             font-size: 13px;
+            margin-top: 5px;
             color: #718096;
-        }
-
-        .color-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .color-row:last-child {
-            border-bottom: none;
-        }
-
-        .color-row label {
-            margin-bottom: 0;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .color-row-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .color-row input[type="color"] {
-            width: 36px;
-            height: 36px;
-            padding: 2px;
-            border-radius: 8px;
         }
 
         .preview-section {
@@ -352,7 +340,7 @@
 
         #preview-frame {
             width: 100%;
-            height: 350px;
+            height: 300px;
             border: 2px dashed #cbd5e0;
             border-radius: 10px;
             background: white;
@@ -490,53 +478,75 @@
     </div>
 
     <div class="container">
-        <h1>📅 Calendar Widget Builder</h1>
-        <p class="subtitle">Create a custom calendar for your Notion workspace</p>
+        <h1>✨ Countdown Widget Builder</h1>
+        <p class="subtitle">Create a custom countdown for your Notion workspace</p>
 
-        <form id="calendar-form">
+        <form id="countdown-form">
             <!-- Basic Settings -->
             <div class="section-title">Settings</div>
+            
+            <div class="form-group">
+                <label for="event-name">Event Name</label>
+                <input type="text" id="event-name" placeholder="e.g., Book Launch, Wedding Day, Goal Deadline" value="" required>
+            </div>
 
             <div class="form-group">
-                <label>Week Starts On</label>
-                <div class="start-day-options">
-                    <div class="start-day-option selected" data-day="sunday">
-                        Sunday
-                    </div>
-                    <div class="start-day-option" data-day="monday">
-                        Monday
-                    </div>
+                <label for="target-date">Date and Time</label>
+                <div class="datetime-row">
+                    <input type="date" id="target-date" required>
+                    <input type="time" id="target-time" value="00:00">
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Display Options</label>
+                <label>Show Time Units</label>
                 <div class="toggle-group">
                     <div class="toggle-item">
-                        <span>Show Today Button</span>
+                        <span>Year</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="show-today-btn">
+                            <input type="checkbox" id="show-year">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="toggle-item">
-                        <span>Highlight Current Date</span>
+                        <span>Month</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="highlight-today" checked>
+                            <input type="checkbox" id="show-month">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="toggle-item">
-                        <span>Show Border</span>
+                        <span>Week</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="show-border">
+                            <input type="checkbox" id="show-week">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="toggle-item">
-                        <span>Show Navigation</span>
+                        <span>Day</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="show-navigation" checked>
+                            <input type="checkbox" id="show-day" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Hour</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-hour">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Minute</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-minute">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Second</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-second">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -548,50 +558,112 @@
             <div class="section-title">Style</div>
 
             <div class="form-group">
-                <div class="color-row">
-                    <label for="theme-color">Theme Color</label>
-                    <div class="color-row-right">
-                        <span class="color-hex" id="theme-color-hex">#F4C3D9</span>
-                        <input type="color" id="theme-color" value="#f4c3d9">
+                <label>Digit Font</label>
+                <div class="font-options">
+                    <div class="font-option selected" data-font="default" style="font-family: -apple-system, sans-serif;">
+                        Ag<small>Default</small>
                     </div>
-                </div>
-                <div class="color-row">
-                    <label for="header-text-color">Header Text Color</label>
-                    <div class="color-row-right">
-                        <span class="color-hex" id="header-text-color-hex">#37352F</span>
-                        <input type="color" id="header-text-color" value="#37352F">
+                    <div class="font-option" data-font="serif" style="font-family: Georgia, serif;">
+                        Ag<small>Serif</small>
                     </div>
-                </div>
-                <div class="color-row">
-                    <label for="day-text-color">Day Numbers Color</label>
-                    <div class="color-row-right">
-                        <span class="color-hex" id="day-text-color-hex">#37352F</span>
-                        <input type="color" id="day-text-color" value="#37352F">
-                    </div>
-                </div>
-                <div class="color-row">
-                    <label for="weekday-text-color">Weekday Labels Color</label>
-                    <div class="color-row-right">
-                        <span class="color-hex" id="weekday-text-color-hex">#718096</span>
-                        <input type="color" id="weekday-text-color" value="#718096">
-                    </div>
-                </div>
-                <div class="color-row">
-                    <label for="bg-color">Background Color</label>
-                    <div class="color-row-right">
-                        <span class="color-hex" id="bg-color-hex">#FFFFFF</span>
-                        <input type="color" id="bg-color" value="#FFFFFF">
+                    <div class="font-option" data-font="mono" style="font-family: 'Courier New', monospace;">
+                        Ag<small>Mono</small>
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Dark Mode</label>
-                <div class="toggle-group single">
+                <label>Text Alignment</label>
+                <div class="align-options">
+                    <div class="align-option" data-align="left">
+                        ⬅️ Left
+                    </div>
+                    <div class="align-option selected" data-align="center">
+                        ↔️ Center
+                    </div>
+                    <div class="align-option" data-align="right">
+                        ➡️ Right
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="text-color">Event Title Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="text-color" value="#37352F">
+                    <div class="color-input-wrapper">
+                        <div class="color-hex" id="text-color-hex">#37352F</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="digit-text-color">Digit Numbers Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="digit-text-color" value="#37352F">
+                    <div class="color-input-wrapper">
+                        <div class="color-hex" id="digit-text-color-hex">#37352F</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="label-text-color">Labels Color (Days, Hours, etc.)</label>
+                <div class="color-input-group">
+                    <input type="color" id="label-text-color" value="#718096">
+                    <div class="color-input-wrapper">
+                        <div class="color-hex" id="label-text-color-hex">#718096</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="bg-color">Background Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="bg-color" value="#FFFFFF">
+                    <div class="color-input-wrapper">
+                        <div class="color-hex" id="bg-color-hex">#FFFFFF</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Digit Background</label>
+                <div class="toggle-group" style="grid-template-columns: 1fr;">
                     <div class="toggle-item">
-                        <span>Enable Dark Theme</span>
+                        <span>Show Background Behind Digits</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="dark-mode">
+                            <input type="checkbox" id="show-digit-bg">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="digit-bg-color-group" style="display: none;">
+                <label for="digit-bg-color">Digit Background Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="digit-bg-color" value="#F7FAFC">
+                    <div class="color-input-wrapper">
+                        <div class="color-hex" id="digit-bg-color-hex">#F7FAFC</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Additional Options</label>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <span>Stop at Zero</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="stop-at-zero" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Show Confetti</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-confetti" checked>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -607,7 +679,7 @@
         </form>
 
         <div id="result-section" class="result-section">
-            <div class="result-label">✅ Your Calendar Widget URL:</div>
+            <div class="result-label">✅ Your Countdown Widget URL:</div>
             <div id="url-display" class="url-display"></div>
             <button id="copy-btn" class="copy-btn">Copy URL</button>
             
@@ -616,7 +688,7 @@
                 1. Copy the URL above<br>
                 2. In your Notion page, type <code>/embed</code><br>
                 3. Paste the URL and press Enter<br>
-                4. Your calendar will appear!
+                4. Your countdown will appear!
             </div>
         </div>
 
@@ -627,113 +699,159 @@
 
     <script>
         // Base URL - UPDATE THIS with your hosted widget URL
-        const WIDGET_BASE_URL = 'https://kdigitalstudio.com/calendar-widget.html';
+        const WIDGET_BASE_URL = 'https://yourdomain.com/countdown-widget.html';
 
         // Get form elements
-        const form = document.getElementById('calendar-form');
+        const form = document.getElementById('countdown-form');
+        const eventNameInput = document.getElementById('event-name');
+        const targetDateInput = document.getElementById('target-date');
+        const targetTimeInput = document.getElementById('target-time');
         const previewFrame = document.getElementById('preview-frame');
         const resultSection = document.getElementById('result-section');
         const urlDisplay = document.getElementById('url-display');
         const copyBtn = document.getElementById('copy-btn');
 
+        // Set default date to October 12, 2026
+        targetDateInput.value = '2026-10-12';
+        targetTimeInput.value = '12:00';
+
         // Settings object
         const settings = {
-            weekStart: 'sunday',
-            showTodayBtn: false,
-            highlightToday: true,
-            showBorder: false,
-            showNavigation: true,
-            themeColor: '#f4c3d9',
-            headerTextColor: '#37352F',
-            dayTextColor: '#37352F',
-            weekdayTextColor: '#718096',
+            digitFont: 'default',
+            textAlign: 'center',
+            textColor: '#37352F',
+            digitTextColor: '#37352F',
+            labelTextColor: '#718096',
             bgColor: '#FFFFFF',
-            darkMode: false
+            showDigitBg: false,
+            digitBgColor: '#F7FAFC',
+            stopAtZero: true,
+            showConfetti: true,
+            showYear: false,
+            showMonth: false,
+            showWeek: false,
+            showDay: true,
+            showHour: false,
+            showMinute: false,
+            showSecond: false
         };
 
-        // Start day selection
-        document.querySelectorAll('.start-day-option').forEach(option => {
+        // Font selection
+        document.querySelectorAll('.font-option').forEach(option => {
             option.addEventListener('click', function() {
-                document.querySelectorAll('.start-day-option').forEach(opt => opt.classList.remove('selected'));
+                document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('selected'));
                 this.classList.add('selected');
-                settings.weekStart = this.dataset.day;
+                settings.digitFont = this.dataset.font;
+                updatePreview();
+            });
+        });
+
+        // Alignment selection
+        document.querySelectorAll('.align-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.align-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.textAlign = this.dataset.align;
                 updatePreview();
             });
         });
 
         // Color pickers
-        const colorInputs = [
-            { id: 'theme-color', key: 'themeColor', hexId: 'theme-color-hex' },
-            { id: 'header-text-color', key: 'headerTextColor', hexId: 'header-text-color-hex' },
-            { id: 'day-text-color', key: 'dayTextColor', hexId: 'day-text-color-hex' },
-            { id: 'weekday-text-color', key: 'weekdayTextColor', hexId: 'weekday-text-color-hex' },
-            { id: 'bg-color', key: 'bgColor', hexId: 'bg-color-hex' }
-        ];
+        const textColorInput = document.getElementById('text-color');
+        const bgColorInput = document.getElementById('bg-color');
+        const textColorHex = document.getElementById('text-color-hex');
+        const bgColorHex = document.getElementById('bg-color-hex');
 
-        colorInputs.forEach(({ id, key, hexId }) => {
-            const input = document.getElementById(id);
-            const hex = document.getElementById(hexId);
-            input.addEventListener('input', function() {
-                settings[key] = this.value;
-                hex.textContent = this.value.toUpperCase();
-                updatePreview();
-            });
+        textColorInput.addEventListener('input', function() {
+            settings.textColor = this.value;
+            textColorHex.textContent = this.value.toUpperCase();
+            updatePreview();
+        });
+
+        const digitTextColorInput = document.getElementById('digit-text-color');
+        const digitTextColorHex = document.getElementById('digit-text-color-hex');
+        
+        digitTextColorInput.addEventListener('input', function() {
+            settings.digitTextColor = this.value;
+            digitTextColorHex.textContent = this.value.toUpperCase();
+            updatePreview();
+        });
+
+        const labelTextColorInput = document.getElementById('label-text-color');
+        const labelTextColorHex = document.getElementById('label-text-color-hex');
+        
+        labelTextColorInput.addEventListener('input', function() {
+            settings.labelTextColor = this.value;
+            labelTextColorHex.textContent = this.value.toUpperCase();
+            updatePreview();
+        });
+
+        bgColorInput.addEventListener('input', function() {
+            settings.bgColor = this.value;
+            bgColorHex.textContent = this.value.toUpperCase();
+            updatePreview();
+        });
+
+        // Digit background toggle
+        const showDigitBgInput = document.getElementById('show-digit-bg');
+        const digitBgColorGroup = document.getElementById('digit-bg-color-group');
+        const digitBgColorInput = document.getElementById('digit-bg-color');
+        const digitBgColorHex = document.getElementById('digit-bg-color-hex');
+
+        showDigitBgInput.addEventListener('change', function() {
+            settings.showDigitBg = this.checked;
+            digitBgColorGroup.style.display = this.checked ? 'block' : 'none';
+            updatePreview();
+        });
+
+        digitBgColorInput.addEventListener('input', function() {
+            settings.digitBgColor = this.value;
+            digitBgColorHex.textContent = this.value.toUpperCase();
+            updatePreview();
         });
 
         // Toggle switches
-        const toggles = [
-            { id: 'show-today-btn', key: 'showTodayBtn' },
-            { id: 'highlight-today', key: 'highlightToday' },
-            { id: 'show-border', key: 'showBorder' },
-            { id: 'show-navigation', key: 'showNavigation' },
-            { id: 'dark-mode', key: 'darkMode' }
-        ];
+        document.getElementById('stop-at-zero').addEventListener('change', function() {
+            settings.stopAtZero = this.checked;
+            updatePreview();
+        });
 
-        toggles.forEach(({ id, key }) => {
-            document.getElementById(id).addEventListener('change', function() {
+        document.getElementById('show-confetti').addEventListener('change', function() {
+            settings.showConfetti = this.checked;
+            updatePreview();
+        });
+
+        // Time unit toggles
+        ['year', 'month', 'week', 'day', 'hour', 'minute', 'second'].forEach(unit => {
+            document.getElementById('show-' + unit).addEventListener('change', function() {
+                const key = 'show' + unit.charAt(0).toUpperCase() + unit.slice(1);
                 settings[key] = this.checked;
-                
-                // If dark mode is toggled, update color defaults
-                if (key === 'darkMode') {
-                    if (this.checked) {
-                        settings.bgColor = '#191919';
-                        settings.headerTextColor = '#FFFFFF';
-                        settings.dayTextColor = '#FFFFFF';
-                        settings.weekdayTextColor = '#9CA3AF';
-                        document.getElementById('bg-color').value = '#191919';
-                        document.getElementById('header-text-color').value = '#FFFFFF';
-                        document.getElementById('day-text-color').value = '#FFFFFF';
-                        document.getElementById('weekday-text-color').value = '#9CA3AF';
-                        document.getElementById('bg-color-hex').textContent = '#191919';
-                        document.getElementById('header-text-color-hex').textContent = '#FFFFFF';
-                        document.getElementById('day-text-color-hex').textContent = '#FFFFFF';
-                        document.getElementById('weekday-text-color-hex').textContent = '#9CA3AF';
-                    } else {
-                        settings.bgColor = '#FFFFFF';
-                        settings.headerTextColor = '#37352F';
-                        settings.dayTextColor = '#37352F';
-                        settings.weekdayTextColor = '#718096';
-                        document.getElementById('bg-color').value = '#FFFFFF';
-                        document.getElementById('header-text-color').value = '#37352F';
-                        document.getElementById('day-text-color').value = '#37352F';
-                        document.getElementById('weekday-text-color').value = '#718096';
-                        document.getElementById('bg-color-hex').textContent = '#FFFFFF';
-                        document.getElementById('header-text-color-hex').textContent = '#37352F';
-                        document.getElementById('day-text-color-hex').textContent = '#37352F';
-                        document.getElementById('weekday-text-color-hex').textContent = '#718096';
-                    }
-                }
-                
                 updatePreview();
             });
         });
 
+        // Update preview on input change
+        eventNameInput.addEventListener('input', updatePreview);
+        targetDateInput.addEventListener('change', updatePreview);
+        targetTimeInput.addEventListener('change', updatePreview);
+
         // Generate widget URL
         function generateWidgetURL() {
-            const params = new URLSearchParams();
+            const eventName = eventNameInput.value;
+            const targetDate = targetDateInput.value;
+            const targetTime = targetTimeInput.value;
+            
+            const params = new URLSearchParams({
+                event: eventName,
+                date: targetDate,
+                time: targetTime
+            });
+
+            // Add all settings to params
             Object.keys(settings).forEach(key => {
                 params.append(key, settings[key]);
             });
+
             return WIDGET_BASE_URL + '?' + params.toString();
         }
 
@@ -747,181 +865,110 @@
 
         // Generate widget HTML for preview
         function generateWidgetHTML() {
-            const s = settings;
+            const eventName = eventNameInput.value.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            const targetDate = new Date(targetDateInput.value + 'T' + targetTimeInput.value);
+            const targetDateTime = targetDate.getTime();
             
-            return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: ${s.bgColor};
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-}
-.calendar {
-    width: 100%;
-    max-width: 350px;
-    ${s.showBorder ? `border: 2px solid ${s.themeColor}; border-radius: 12px; padding: 20px;` : ''}
-}
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.month-year {
-    font-size: 18px;
-    font-weight: 600;
-    color: ${s.headerTextColor};
-}
-.nav-buttons {
-    display: ${s.showNavigation ? 'flex' : 'none'};
-    gap: 8px;
-}
-.nav-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: ${s.themeColor}22;
-    color: ${s.headerTextColor};
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
-}
-.nav-btn:hover {
-    background: ${s.themeColor}44;
-}
-.today-btn {
-    display: ${s.showTodayBtn ? 'block' : 'none'};
-    margin-bottom: 15px;
-    padding: 8px 16px;
-    background: ${s.themeColor};
-    color: ${s.darkMode ? '#191919' : '#FFFFFF'};
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-}
-.weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    margin-bottom: 8px;
-}
-.weekday {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 500;
-    color: ${s.weekdayTextColor};
-    padding: 8px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-}
-.day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: ${s.dayTextColor};
-    border-radius: 50%;
-    cursor: default;
-}
-.day.other-month {
-    opacity: 0.3;
-}
-.day.today {
-    ${s.highlightToday ? `background: ${s.themeColor}; color: ${s.darkMode ? '#191919' : '#FFFFFF'}; font-weight: 600;` : ''}
-}
-</style></head><body>
-<div class="calendar">
-    <button class="today-btn" onclick="goToToday()">Today</button>
-    <div class="header">
-        <span class="month-year" id="month-year"></span>
-        <div class="nav-buttons">
-            <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
-            <button class="nav-btn" onclick="changeMonth(1)">›</button>
-        </div>
-    </div>
-    <div class="weekdays" id="weekdays"></div>
-    <div class="days" id="days"></div>
-</div>
-<script>
-let currentDate = new Date();
-const weekStart = '${s.weekStart}';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const weekdaysSun = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-const weekdaysMon = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+            let fontFamily = '-apple-system, sans-serif';
+            if (settings.digitFont === 'serif') {
+                fontFamily = 'Georgia, serif';
+            } else if (settings.digitFont === 'mono') {
+                fontFamily = 'Courier New, monospace';
+            }
 
-function renderCalendar() {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const today = new Date();
-    
-    document.getElementById('month-year').textContent = months[month] + ' ' + year;
-    
-    // Render weekday headers
-    const weekdaysEl = document.getElementById('weekdays');
-    const weekdays = weekStart === 'monday' ? weekdaysMon : weekdaysSun;
-    weekdaysEl.innerHTML = weekdays.map(d => '<div class="weekday">' + d + '</div>').join('');
-    
-    // Calculate days
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    let startDayOfWeek = firstDay.getDay();
-    
-    if (weekStart === 'monday') {
-        startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
-    }
-    
-    const daysEl = document.getElementById('days');
-    let html = '';
-    
-    // Previous month days
-    const prevMonthLastDay = new Date(year, month, 0).getDate();
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-        html += '<div class="day other-month">' + (prevMonthLastDay - i) + '</div>';
-    }
-    
-    // Current month days
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-        const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-        html += '<div class="day' + (isToday ? ' today' : '') + '">' + day + '</div>';
-    }
-    
-    // Next month days
-    const totalCells = Math.ceil((startDayOfWeek + lastDay.getDate()) / 7) * 7;
-    const remaining = totalCells - (startDayOfWeek + lastDay.getDate());
-    for (let i = 1; i <= remaining; i++) {
-        html += '<div class="day other-month">' + i + '</div>';
-    }
-    
-    daysEl.innerHTML = html;
-}
+            const justify = settings.textAlign === 'left' ? 'flex-start' : 
+                           settings.textAlign === 'right' ? 'flex-end' : 'center';
 
-function changeMonth(delta) {
-    currentDate.setMonth(currentDate.getMonth() + delta);
-    renderCalendar();
-}
+            const html = [
+                '<!DOCTYPE html>',
+                '<html><head><meta charset="UTF-8"><style>',
+                '* { margin: 0; padding: 0; box-sizing: border-box; }',
+                'body { font-family: -apple-system, sans-serif; background: ' + settings.bgColor + '; color: ' + settings.textColor + '; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }',
+                '.countdown-container { text-align: ' + settings.textAlign + '; width: 100%; }',
+                '.event-name { font-size: 24px; font-weight: 600; margin-bottom: 30px; opacity: 0.9; color: ' + settings.textColor + '; }',
+                '.countdown { display: flex; justify-content: ' + justify + '; gap: 20px; flex-wrap: wrap; }',
+                '.time-unit { display: flex; flex-direction: column; align-items: center; min-width: 80px; }',
+                '.time-value { font-size: 48px; font-weight: 700; font-family: ' + fontFamily + '; line-height: 1; color: ' + settings.digitTextColor + ';' + (settings.showDigitBg ? ' background: ' + settings.digitBgColor + '; padding: 15px 20px; border-radius: 12px;' : '') + ' }',
+                '.time-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-top: 8px; font-weight: 500; color: ' + settings.labelTextColor + '; }',
+                '.completed { font-size: 36px; font-weight: 700; }',
+                '</style></head><body>',
+                '<div class="countdown-container">',
+                '<div class="event-name">' + eventName + '</div>',
+                '<div class="countdown" id="countdown"></div>',
+                '</div>',
+                '<script>',
+                'var targetDate = new Date(' + targetDateTime + ');',
+                'var settings = ' + JSON.stringify(settings) + ';',
+                'function updateCountdown() {',
+                '  var now = new Date();',
+                '  var difference = targetDate - now;',
+                '  var el = document.getElementById("countdown");',
+                '  if (difference <= 0) {',
+                '    if (settings.stopAtZero) {',
+                '      var start = settings.showConfetti ? "🎉 " : "";',
+                '      var end = settings.showConfetti ? " 🎉" : "";',
+                '      el.innerHTML = "<div class=\\"completed\\">" + start + "Event Day!" + end + "</div>";',
+                '      return;',
+                '    }',
+                '    difference = Math.abs(difference);',
+                '  }',
+                '  var totalYears = Math.floor(difference / 31536000000);',
+                '  var totalMonths = Math.floor(difference / 2592000000);',
+                '  var totalWeeks = Math.floor(difference / 604800000);',
+                '  var totalDays = Math.floor(difference / 86400000);',
+                '  var totalHours = Math.floor(difference / 3600000);',
+                '  var totalMinutes = Math.floor(difference / 60000);',
+                '  var totalSeconds = Math.floor(difference / 1000);',
+                '  var showCount = 0;',
+                '  if (settings.showYear) showCount++;',
+                '  if (settings.showMonth) showCount++;',
+                '  if (settings.showWeek) showCount++;',
+                '  if (settings.showDay) showCount++;',
+                '  if (settings.showHour) showCount++;',
+                '  if (settings.showMinute) showCount++;',
+                '  if (settings.showSecond) showCount++;',
+                '  var y, mo, w, d, h, m, s;',
+                '  if (showCount === 1) {',
+                '    y = totalYears;',
+                '    mo = totalMonths;',
+                '    w = totalWeeks;',
+                '    d = totalDays;',
+                '    h = totalHours;',
+                '    m = totalMinutes;',
+                '    s = totalSeconds;',
+                '  } else {',
+                '    var remaining = difference;',
+                '    y = Math.floor(remaining / 31536000000);',
+                '    remaining = remaining % 31536000000;',
+                '    mo = Math.floor(remaining / 2592000000);',
+                '    remaining = remaining % 2592000000;',
+                '    w = Math.floor(remaining / 604800000);',
+                '    remaining = remaining % 604800000;',
+                '    d = Math.floor(remaining / 86400000);',
+                '    remaining = remaining % 86400000;',
+                '    h = Math.floor(remaining / 3600000);',
+                '    remaining = remaining % 3600000;',
+                '    m = Math.floor(remaining / 60000);',
+                '    remaining = remaining % 60000;',
+                '    s = Math.floor(remaining / 1000);',
+                '  }',
+                '  var html = "";',
+                '  if (settings.showYear) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + y + "</span><span class=\\"time-label\\">Years</span></div>";',
+                '  if (settings.showMonth) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + mo + "</span><span class=\\"time-label\\">Months</span></div>";',
+                '  if (settings.showWeek) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + w + "</span><span class=\\"time-label\\">Weeks</span></div>";',
+                '  if (settings.showDay) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + d + "</span><span class=\\"time-label\\">Days</span></div>";',
+                '  if (settings.showHour) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + h + "</span><span class=\\"time-label\\">Hours</span></div>";',
+                '  if (settings.showMinute) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + m + "</span><span class=\\"time-label\\">Minutes</span></div>";',
+                '  if (settings.showSecond) html += "<div class=\\"time-unit\\"><span class=\\"time-value\\">" + s + "</span><span class=\\"time-label\\">Seconds</span></div>";',
+                '  el.innerHTML = html;',
+                '}',
+                'updateCountdown();',
+                'setInterval(updateCountdown, 1000);',
+                '<\/script>',
+                '</body></html>'
+            ];
 
-function goToToday() {
-    currentDate = new Date();
-    renderCalendar();
-}
-
-renderCalendar();
-<\/script>
-</body></html>`;
+            return html.join('');
         }
 
         // Form submission
@@ -937,6 +984,7 @@ renderCalendar();
         copyBtn.addEventListener('click', function() {
             const url = urlDisplay.textContent;
             
+            // Try modern clipboard API first
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(url).then(function() {
                     copyBtn.textContent = '✓ Copied!';
@@ -946,13 +994,16 @@ renderCalendar();
                         copyBtn.classList.remove('copied');
                     }, 2000);
                 }).catch(function() {
+                    // If clipboard API fails, use fallback
                     fallbackCopyTextToClipboard(url);
                 });
             } else {
+                // Use fallback for older browsers
                 fallbackCopyTextToClipboard(url);
             }
         });
 
+        // Fallback copy method
         function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -979,9 +1030,14 @@ renderCalendar();
                         copyBtn.textContent = 'Copy URL';
                         copyBtn.classList.remove('copied');
                     }, 2000);
+                } else {
+                    copyBtn.textContent = '❌ Copy failed - please select and copy manually';
+                    setTimeout(function() {
+                        copyBtn.textContent = 'Copy URL';
+                    }, 3000);
                 }
             } catch (err) {
-                copyBtn.textContent = '❌ Copy failed';
+                copyBtn.textContent = '❌ Copy failed - please select and copy manually';
                 setTimeout(function() {
                     copyBtn.textContent = 'Copy URL';
                 }, 3000);
